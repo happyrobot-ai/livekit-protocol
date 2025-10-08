@@ -918,9 +918,10 @@ func EvaluateDispatchRule(projectID string, trunk *livekit.SIPInboundTrunkInfo, 
 		// TODO: Remove "_" if the prefix is empty for consistency with Callee dispatch rule.
 		// TODO: Do we need to escape specific characters in the number?
 		// TODO: Include actual SIP call ID in the room name?
-		room = from
+		// HappyRobot: do not include the phone number (`from`) in the room name.
+		room = guid.New("")
 		if pref := rule.DispatchRuleIndividual.GetRoomPrefix(); pref != "" {
-			room = pref + "_" + from
+			room = pref + "_" + guid.New("")
 		}
 		if !rule.DispatchRuleIndividual.NoRandomness {
 			room += "_" + guid.New("")
