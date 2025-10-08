@@ -28,6 +28,7 @@ const (
 	EventRoomStarted       = "room_started"
 	EventRoomFinished      = "room_finished"
 	EventParticipantJoined = "participant_joined"
+	EventParticipantUpdate = "participant_update"
 	EventParticipantLeft   = "participant_left"
 	EventTrackPublished    = "track_published"
 	EventTrackUnpublished  = "track_unpublished"
