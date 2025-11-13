@@ -20,7 +20,6 @@ import (
 	"slices"
 	"strings"
 	"sync"
-	"testing"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -105,6 +104,10 @@ type Logger interface {
 type UnlikelyLogger struct {
 	logger        Logger
 	keysAndValues []any
+}
+
+func NewUnlikelyLogger(logger Logger, keysAndValues ...any) UnlikelyLogger {
+	return UnlikelyLogger{logger, keysAndValues}
 }
 
 func (l UnlikelyLogger) makeLogger() Logger {
@@ -486,7 +489,12 @@ func (l LogRLogger) WithDeferredValues() (Logger, DeferredFieldResolver) {
 	return l, zaputil.NoOpDeferrer{}
 }
 
-func NewTestLogger(t *testing.T) Logger {
+type TestLogger interface {
+	Logf(format string, args ...any)
+	Log(args ...any)
+}
+
+func NewTestLogger(t TestLogger) Logger {
 	return LogRLogger(funcr.New(func(prefix, args string) {
 		if prefix != "" {
 			t.Logf("%s: %s\n", prefix, args)

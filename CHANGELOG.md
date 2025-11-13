@@ -1,5 +1,89 @@
 # github.com/livekit/protocol
 
+## 1.42.2
+
+### Patch Changes
+
+- Include mid in SessionDescription - [#1257](https://github.com/livekit/protocol/pull/1257) ([@lukasIO](https://github.com/lukasIO))
+
+## 1.42.1
+
+## 1.42.0
+
+### Minor Changes
+
+- rename ListUpdate "del" field to "rename" - [#1203](https://github.com/livekit/protocol/pull/1203) ([@rektdeckard](https://github.com/rektdeckard))
+
+- Utilities for phone number functionality - [#1206](https://github.com/livekit/protocol/pull/1206) ([@nishadmusthafa](https://github.com/nishadmusthafa))
+
+- Adding a call_context field to SIPCallInfo - [#1188](https://github.com/livekit/protocol/pull/1188) ([@nishadmusthafa](https://github.com/nishadmusthafa))
+
+- Added DisplayName field to CreateSIPParticipantRequest - [#1216](https://github.com/livekit/protocol/pull/1216) ([@alexlivekit](https://github.com/alexlivekit))
+
+### Patch Changes
+
+- Adding get and update apis for livekit phone numbers - [#1179](https://github.com/livekit/protocol/pull/1179) ([@nishadmusthafa](https://github.com/nishadmusthafa))
+
+- allow credentials to be stored in SIP tokens - [#1213](https://github.com/livekit/protocol/pull/1213) ([@davidzhao](https://github.com/davidzhao))
+
+- Unifying data types for phone numbers - [#1190](https://github.com/livekit/protocol/pull/1190) ([@nishadmusthafa](https://github.com/nishadmusthafa))
+
+- Adding an rpc to record call context using SipCallInfo - [#1189](https://github.com/livekit/protocol/pull/1189) ([@nishadmusthafa](https://github.com/nishadmusthafa))
+
+## 1.41.0
+
+### Minor Changes
+
+- Adding public apis for Livekit Phone Numbers feature - [#1146](https://github.com/livekit/protocol/pull/1146) ([@nishadmusthafa](https://github.com/nishadmusthafa))
+
+- Add encryption metadata for data packets - [#1127](https://github.com/livekit/protocol/pull/1127) ([@lukasIO](https://github.com/lukasIO))
+
+- Use OpenTelemetry types. Pass tracer options. - [#1177](https://github.com/livekit/protocol/pull/1177) ([@dennwc](https://github.com/dennwc))
+
+- Add a Name helper for SIPTransport. - [#1175](https://github.com/livekit/protocol/pull/1175) ([@dennwc](https://github.com/dennwc))
+
+## 1.40.0
+
+### Minor Changes
+
+- Adding SIP Protocol generated call id to SipCall - [#1119](https://github.com/livekit/protocol/pull/1119) ([@nishadmusthafa](https://github.com/nishadmusthafa))
+
+### Patch Changes
+
+- Store SDP cid in TrackInfo. - [#1164](https://github.com/livekit/protocol/pull/1164) ([@boks1971](https://github.com/boks1971))
+
+- Support per simulcast codec layers. - [#1157](https://github.com/livekit/protocol/pull/1157) ([@boks1971](https://github.com/boks1971))
+
+- Add webhook for aborted participant connection. - [#1166](https://github.com/livekit/protocol/pull/1166) ([@boks1971](https://github.com/boks1971))
+
+- Go SDK support for chat messages. - [#1147](https://github.com/livekit/protocol/pull/1147) ([@dennwc](https://github.com/dennwc))
+
+- Go SDK support for stream data messages. - [#1148](https://github.com/livekit/protocol/pull/1148) ([@dennwc](https://github.com/dennwc))
+
+- Updating how ListSIPInboundTrunkRequest filtering occurs by normalising phone number that are being compared - [#1126](https://github.com/livekit/protocol/pull/1126) ([@nishadmusthafa](https://github.com/nishadmusthafa))
+
+- add hash function to generate common guid - [#1163](https://github.com/livekit/protocol/pull/1163) ([@paulwe](https://github.com/paulwe))
+
+- Allow adding, removing items and clearing list fields. - [#1142](https://github.com/livekit/protocol/pull/1142) ([@dennwc](https://github.com/dennwc))
+
+- Allow clients to specify video layers mode. - [#1158](https://github.com/livekit/protocol/pull/1158) ([@boks1971](https://github.com/boks1971))
+
+## 1.39.3
+
+## 1.39.2
+
+## 1.39.1
+
+### Patch Changes
+
+- adding detailed responses to the trunk match logic which can help with decisions on blocking - [#1101](https://github.com/livekit/protocol/pull/1101) ([@nishadmusthafa](https://github.com/nishadmusthafa))
+
+- E2E reliability for data channel - [#1099](https://github.com/livekit/protocol/pull/1099) ([@cnderrauber](https://github.com/cnderrauber))
+
+- ensure access token do not contain sensitive credentials - [#1097](https://github.com/livekit/protocol/pull/1097) ([@davidzhao](https://github.com/davidzhao))
+
+- WHIP internal signalling to be able to support WHIP in OSS. - [#1091](https://github.com/livekit/protocol/pull/1091) ([@boks1971](https://github.com/boks1971))
+
 ## 1.39.0
 
 ### Patch Changes

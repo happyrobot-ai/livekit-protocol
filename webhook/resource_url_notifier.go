@@ -49,12 +49,18 @@ type ResourceURLNotifierConfig struct {
 }
 
 var DefaultResourceURLNotifierConfig = ResourceURLNotifierConfig{
-	MaxAge:   10 * time.Second,
+	MaxAge:   30 * time.Second,
 	MaxDepth: 200,
 }
 
 type poster interface {
-	Process(ctx context.Context, queuedAt time.Time, event *livekit.WebhookEvent, params *ResourceURLNotifierParams)
+	Process(
+		ctx context.Context,
+		queuedAt time.Time,
+		event *livekit.WebhookEvent,
+		params *ResourceURLNotifierParams,
+		qLen int,
+	)
 }
 
 type resourceQueueInfo struct {
@@ -72,6 +78,7 @@ type ResourceURLNotifierParams struct {
 	APIKey     string
 	APISecret  string
 	FieldsHook func(whi *livekit.WebhookInfo)
+	EventKey   func(event *livekit.WebhookEvent) string
 	FilterParams
 }
 
@@ -149,6 +156,10 @@ func (r *ResourceURLNotifier) SetFilter(params FilterParams) {
 	r.filter.SetFilter(params)
 }
 
+func (r *ResourceURLNotifier) IsAllowed(event string) bool {
+	return r.filter.IsAllowed(event)
+}
+
 func (r *ResourceURLNotifier) RegisterProcessedHook(hook func(ctx context.Context, whi *livekit.WebhookInfo)) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -170,7 +181,12 @@ func (r *ResourceURLNotifier) QueueNotify(ctx context.Context, event *livekit.We
 		return errClosed
 	}
 
-	key := eventKey(event)
+	var key string
+	if r.params.EventKey != nil {
+		key = r.params.EventKey(event)
+	} else {
+		key = EventKey(event)
+	}
 
 	p := &NotifyParams{}
 	for _, o := range opts {
@@ -211,11 +227,12 @@ func (r *ResourceURLNotifier) QueueNotify(ctx context.Context, event *livekit.We
 	}
 	r.mu.Unlock()
 
-	err := rqi.resourceQueue.Enqueue(ctx, event, &params)
+	qLen, err := rqi.resourceQueue.Enqueue(ctx, event, &params)
 	if err != nil {
 		fields := logFields(event, params.URL)
 		fields = append(fields, "reason", err)
 		params.Logger.Infow("dropped webhook", fields...)
+		IncDispatchDrop(err.Error())
 
 		if ph := r.getProcessedHook(); ph != nil {
 			whi := webhookInfo(
@@ -233,6 +250,8 @@ func (r *ResourceURLNotifier) QueueNotify(ctx context.Context, event *livekit.We
 			}
 			ph(ctx, whi)
 		}
+	} else {
+		RecordQueueLength(qLen)
 	}
 	return err
 }
@@ -251,15 +270,22 @@ func (r *ResourceURLNotifier) Stop(force bool) {
 }
 
 // poster interface
-func (r *ResourceURLNotifier) Process(ctx context.Context, queuedAt time.Time, event *livekit.WebhookEvent, params *ResourceURLNotifierParams) {
+func (r *ResourceURLNotifier) Process(
+	ctx context.Context,
+	queuedAt time.Time,
+	event *livekit.WebhookEvent,
+	params *ResourceURLNotifierParams,
+	qLen int,
+) {
 	fields := logFields(event, params.URL)
 
 	queueDuration := time.Since(queuedAt)
-	fields = append(fields, "queueDuration", queueDuration)
+	fields = append(fields, "queueDuration", queueDuration, "qLen", qLen)
 
 	if queueDuration > params.Config.MaxAge {
 		fields = append(fields, "reason", "age")
 		params.Logger.Infow("dropped webhook", fields...)
+		IncDispatchDrop("age")
 
 		if ph := r.getProcessedHook(); ph != nil {
 			whi := webhookInfo(
@@ -286,8 +312,10 @@ func (r *ResourceURLNotifier) Process(ctx context.Context, queuedAt time.Time, e
 	fields = append(fields, "sendDuration", sendDuration)
 	if err != nil {
 		params.Logger.Warnw("failed to send webhook", err, fields...)
+		IncDispatchFailure()
 	} else {
 		params.Logger.Infow("sent webhook", fields...)
+		IncDispatchSuccess()
 	}
 	if ph := r.getProcessedHook(); ph != nil {
 		whi := webhookInfo(

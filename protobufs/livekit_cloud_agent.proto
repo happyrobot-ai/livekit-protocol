@@ -21,20 +21,27 @@ option go_package = "github.com/livekit/protocol/livekit";
 option csharp_namespace = "LiveKit.Proto";
 option ruby_package = "LiveKit::Proto";
 
+enum AgentSecretKind {
+    AGENT_SECRET_KIND_UNKNOWN = 0;
+    AGENT_SECRET_KIND_ENVIRONMENT = 1;
+    AGENT_SECRET_KIND_FILE = 2;
+}
+
 message AgentSecret {
     string name = 1;
     bytes value = 2;
     google.protobuf.Timestamp created_at = 3;
     google.protobuf.Timestamp updated_at = 4;
+    AgentSecretKind kind = 5;
 }
 
 message CreateAgentRequest {
-    string agent_name = 1;
+    string agent_name            = 1 [deprecated=true];
     repeated AgentSecret secrets = 2;
-    int32 replicas = 3;
-    int32 max_replicas = 4;
-    string cpu_req = 5;
-    repeated string regions = 6;
+    int32 replicas               = 3 [deprecated=true];
+    int32 max_replicas           = 4 [deprecated=true];
+    string cpu_req               = 5 [deprecated=true];
+    repeated string regions      = 6;
 }
 
 message CreateAgentResponse {
@@ -43,6 +50,14 @@ message CreateAgentResponse {
     string status = 3;
     string version = 4;
     string presigned_url = 5;
+    string tag = 6;
+    repeated string server_regions = 7;
+    PresignedPostRequest presigned_post_request = 8;
+}
+
+message PresignedPostRequest {
+  string url = 1;
+  map<string, string> values = 2;
 }
 
 message AgentDeployment {
@@ -56,6 +71,9 @@ message AgentDeployment {
     string cur_cpu = 8;
     string cur_mem = 9;
     string mem_req = 10;
+    string mem_limit = 11;
+    string cpu_limit = 12;
+    string server_region = 13;
 }
 
 message AgentInfo {
@@ -80,6 +98,9 @@ message AgentVersion {
     string version = 1;
     bool current = 2;
     google.protobuf.Timestamp created_at = 3;
+    google.protobuf.Timestamp deployed_at = 4;
+    map<string, string> attributes = 5;
+    string status = 6;
 }
 
 message ListAgentVersionsRequest {
@@ -92,12 +113,12 @@ message ListAgentVersionsResponse {
 }
 
 message UpdateAgentRequest {
-    string agent_id = 1;
-    string agent_name = 2;
-    int32 replicas = 3;
-    int32 max_replicas = 4;
-    string cpu_req = 5;
-    repeated string regions = 6;
+    string agent_id              = 1;
+    string agent_name            = 2 [deprecated=true];
+    int32 replicas               = 3 [deprecated=true];
+    int32 max_replicas           = 4 [deprecated=true];
+    string cpu_req               = 5 [deprecated=true];
+    repeated string regions      = 6;
     repeated AgentSecret secrets = 7;
 }
 
@@ -106,13 +127,22 @@ message UpdateAgentResponse {
     string message = 2;
 }
 
-message DeployAgentRequest {
+message RestartAgentRequest {
     string agent_id = 1;
-    string agent_name = 2;
+}
+
+message RestartAgentResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message DeployAgentRequest {
+    string agent_id              = 1;
+    string agent_name            = 2 [deprecated=true];
     repeated AgentSecret secrets = 3;
-    int32 replicas = 4;
-    int32 max_replicas = 5;
-    string cpu_req = 6;
+    int32 replicas               = 4 [deprecated=true];
+    int32 max_replicas           = 5 [deprecated=true];
+    string cpu_req               = 6 [deprecated=true];
 }
 
 message DeployAgentResponse {
@@ -120,6 +150,8 @@ message DeployAgentResponse {
     string message = 2;
     string agent_id = 3;
     string presigned_url = 4;
+    string tag = 5;
+    PresignedPostRequest presigned_post_request = 6;
 }
 
 message UpdateAgentSecretsRequest {
@@ -182,6 +214,7 @@ service CloudAgent {
     rpc ListAgentVersions(ListAgentVersionsRequest) returns (ListAgentVersionsResponse) {}
     rpc ListAgentSecrets(ListAgentSecretsRequest) returns (ListAgentSecretsResponse) {}
     rpc UpdateAgent(UpdateAgentRequest) returns (UpdateAgentResponse) {}
+    rpc RestartAgent(RestartAgentRequest) returns (RestartAgentResponse) {}
     rpc DeployAgent(DeployAgentRequest) returns (DeployAgentResponse) {}
     rpc UpdateAgentSecrets(UpdateAgentSecretsRequest) returns (UpdateAgentSecretsResponse) {}
     rpc RollbackAgent(RollbackAgentRequest) returns (RollbackAgentResponse) {}

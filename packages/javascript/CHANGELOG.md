@@ -1,5 +1,105 @@
 # @livekit/protocol
 
+## 1.42.2
+
+### Patch Changes
+
+- Include mid in SessionDescription - [#1257](https://github.com/livekit/protocol/pull/1257) ([@lukasIO](https://github.com/lukasIO))
+
+## 1.42.1
+
+### Patch Changes
+
+- Add InputVideo/AudioState to ICERestartWHIPResourceResponse - [#1237](https://github.com/livekit/protocol/pull/1237) ([@biglittlebigben](https://github.com/biglittlebigben))
+
+- Document mono package, support Unix and Parse. - [#1242](https://github.com/livekit/protocol/pull/1242) ([@dennwc](https://github.com/dennwc))
+
+- Fix zero time handling in mono package. - [#1241](https://github.com/livekit/protocol/pull/1241) ([@dennwc](https://github.com/dennwc))
+
+- Setting service - [#1240](https://github.com/livekit/protocol/pull/1240) ([@paulwe](https://github.com/paulwe))
+
+- Enable recording - [#1233](https://github.com/livekit/protocol/pull/1233) ([@paulwe](https://github.com/paulwe))
+
+- handle session timer skips >1 min - [#1227](https://github.com/livekit/protocol/pull/1227) ([@paulwe](https://github.com/paulwe))
+
+## 1.42.0
+
+### Minor Changes
+
+- rename ListUpdate "del" field to "rename" - [#1203](https://github.com/livekit/protocol/pull/1203) ([@rektdeckard](https://github.com/rektdeckard))
+
+### Patch Changes
+
+- update psrpc - [#1204](https://github.com/livekit/protocol/pull/1204) ([@paulwe](https://github.com/paulwe))
+
+- add observability grant setter - [#1214](https://github.com/livekit/protocol/pull/1214) ([@paulwe](https://github.com/paulwe))
+
+- Add feature flags to GetIngressInfoResponse - [#1218](https://github.com/livekit/protocol/pull/1218) ([@biglittlebigben](https://github.com/biglittlebigben))
+
+- Add fields needed for WHIP to SFU support - [#1183](https://github.com/livekit/protocol/pull/1183) ([@biglittlebigben](https://github.com/biglittlebigben))
+
+- Add new TokenSourceRequest / TokenSourceResponse message types - [#1224](https://github.com/livekit/protocol/pull/1224) ([@1egoman](https://github.com/1egoman))
+
+- Suport for simulcast codec of audio. - [#1207](https://github.com/livekit/protocol/pull/1207) ([@boks1971](https://github.com/boks1971))
+
+## 1.41.0
+
+### Minor Changes
+
+- Add encryption metadata for data packets - [#1127](https://github.com/livekit/protocol/pull/1127) ([@lukasIO](https://github.com/lukasIO))
+
+### Patch Changes
+
+- Add SIPHostnamePrefix - [#1155](https://github.com/livekit/protocol/pull/1155) ([@biglittlebigben](https://github.com/biglittlebigben))
+
+- update agents observability codegen - [#1173](https://github.com/livekit/protocol/pull/1173) ([@paulwe](https://github.com/paulwe))
+
+## 1.40.0
+
+### Patch Changes
+
+- Add fields to support AssumeRole in egress S3 uploads - [#1124](https://github.com/livekit/protocol/pull/1124) ([@biglittlebigben](https://github.com/biglittlebigben))
+
+- Store SDP cid in TrackInfo. - [#1164](https://github.com/livekit/protocol/pull/1164) ([@boks1971](https://github.com/boks1971))
+
+- Support per simulcast codec layers. - [#1157](https://github.com/livekit/protocol/pull/1157) ([@boks1971](https://github.com/boks1971))
+
+- Add webhook for aborted participant connection. - [#1166](https://github.com/livekit/protocol/pull/1166) ([@boks1971](https://github.com/boks1971))
+
+- add hash function to generate common guid - [#1163](https://github.com/livekit/protocol/pull/1163) ([@paulwe](https://github.com/paulwe))
+
+- Redact external_id field - [#1152](https://github.com/livekit/protocol/pull/1152) ([@biglittlebigben](https://github.com/biglittlebigben))
+
+- Allow adding, removing items and clearing list fields. - [#1142](https://github.com/livekit/protocol/pull/1142) ([@dennwc](https://github.com/dennwc))
+
+- Add latest CreateRoomRequest fields to RoomConfiguration - [#1132](https://github.com/livekit/protocol/pull/1132) ([@biglittlebigben](https://github.com/biglittlebigben))
+
+- update agent reporter for cloud agents - [#1128](https://github.com/livekit/protocol/pull/1128) ([@paulwe](https://github.com/paulwe))
+
+- Allow clients to specify video layers mode. - [#1158](https://github.com/livekit/protocol/pull/1158) ([@boks1971](https://github.com/boks1971))
+
+## 1.39.3
+
+### Patch Changes
+
+- normalize common os names - [#1118](https://github.com/livekit/protocol/pull/1118) ([@paulwe](https://github.com/paulwe))
+
+- Add client info case for ESP32 - [#1113](https://github.com/livekit/protocol/pull/1113) ([@ladvoc](https://github.com/ladvoc))
+
+## 1.39.2
+
+### Patch Changes
+
+- Add id field to SessionDescription message - [#1105](https://github.com/livekit/protocol/pull/1105) ([@lukasIO](https://github.com/lukasIO))
+
+## 1.39.1
+
+### Patch Changes
+
+- E2E reliability for data channel - [#1099](https://github.com/livekit/protocol/pull/1099) ([@cnderrauber](https://github.com/cnderrauber))
+
+- WHIP internal signalling to be able to support WHIP in OSS. - [#1091](https://github.com/livekit/protocol/pull/1091) ([@boks1971](https://github.com/boks1971))
+
 ## 1.39.0
 
 ### Minor Changes

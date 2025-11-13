@@ -49,7 +49,16 @@ func Proto() error {
 		"livekit_room.proto",
 		"livekit_sip.proto",
 		"livekit_cloud_agent.proto",
+		"livekit_phone_number.proto",
+		"livekit_connector.proto",
+		"livekit_connector_whatsapp.proto",
+		"livekit_connector_twilio.proto",
 	}
+
+	agentProtoFiles := []string{
+		"agent/livekit_agent_session.proto",
+	}
+
 	protoFiles := []string{
 		"livekit_agent.proto",
 		"livekit_analytics.proto",
@@ -58,6 +67,7 @@ func Proto() error {
 		"livekit_rtc.proto",
 		"livekit_webhook.proto",
 		"livekit_metrics.proto",
+		"livekit_token_source.proto",
 	}
 	grpcProtoFiles := []string{
 		"infra/link.proto",
@@ -74,7 +84,10 @@ func Proto() error {
 		"rpc/room.proto",
 		"rpc/roommanager.proto",
 		"rpc/signal.proto",
+		"rpc/whip_signal.proto",
 		"rpc/sip.proto",
+		"rpc/connector.proto",
+		"rpc/common.proto",
 	}
 
 	fmt.Println("generating protobuf")
@@ -145,6 +158,23 @@ func Proto() error {
 	if err := cmd.Run(); err != nil {
 		return err
 	}
+
+	fmt.Println("generating protobuf (livekit/agent)")
+	{
+		args := []string{
+			"--go_out", target,
+			"--go_opt=paths=source_relative",
+			"--plugin=go=" + protocGoPath,
+			"-I=./protobufs",
+		}
+		args = append(args, agentProtoFiles...)
+		cmd := exec.Command(protoc, args...)
+		connectStd(cmd)
+		if err := cmd.Run(); err != nil {
+			return err
+		}
+	}
+
 	fmt.Println("generating grpc protobuf")
 	args = append([]string{
 		"--go_out", ".",

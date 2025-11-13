@@ -72,6 +72,8 @@ service RoomService {
   // The participant will be removed from the current room and added to the destination room.
   // From the other observers' perspective, the participant would've disconnected from the previous room and joined the new one.
   rpc MoveParticipant(MoveParticipantRequest) returns (MoveParticipantResponse);
+
+  rpc PerformRpc(PerformRpcRequest) returns (PerformRpcResponse);
 }
 
 message CreateRoomRequest {
@@ -228,6 +230,8 @@ message RoomConfiguration {
   uint32 departure_timeout = 3;
   // limit number of participants that can be in a room, excluding Egress and Ingress participants
   uint32 max_participants = 4;
+  // metadata of room
+  string metadata = 11;
   // egress
   RoomEgress egress = 5;
   // playout delay of subscriber
@@ -239,6 +243,8 @@ message RoomConfiguration {
 
   // Define agents that should be dispatched to this room
   repeated RoomAgentDispatch agents = 10;
+
+  // NEXT_ID: 12
 }
 
 message ForwardParticipantRequest {
@@ -264,3 +270,16 @@ message MoveParticipantRequest {
 
 message MoveParticipantResponse {
 }
+
+message PerformRpcRequest {
+  string room = 1;
+  string destination_identity = 2;
+  string method = 3;
+  string payload = 4;
+  uint32 response_timeout_ms = 5;
+}
+
+message PerformRpcResponse {
+  string payload = 1;
+}
+
