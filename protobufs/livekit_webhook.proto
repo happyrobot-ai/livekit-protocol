@@ -22,6 +22,7 @@ option ruby_package = "LiveKit::Proto";
 import "livekit_models.proto";
 import "livekit_egress.proto";
 import "livekit_ingress.proto";
+import "livekit_sip.proto";
 
 message WebhookEvent {
   // one of room_started, room_finished, participant_joined, participant_left, participant_connection_aborted,
@@ -51,5 +52,7 @@ message WebhookEvent {
 
   int32 num_dropped = 11 [deprecated=true];
 
-  // NEXT_ID: 12
+  SIPTransferInfo sip_transfer_info = 12;
+  
+  // NEXT_ID: 13
 }
