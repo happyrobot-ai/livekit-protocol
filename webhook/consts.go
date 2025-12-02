@@ -38,4 +38,5 @@ const (
 	EventEgressEnded                  = "egress_ended"
 	EventIngressStarted               = "ingress_started"
 	EventIngressEnded                 = "ingress_ended"
+	EventSIPTransferEnded             = "sip_transfer_ended"
 )
