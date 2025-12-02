@@ -55,9 +55,10 @@ type WebhookEvent struct {
 	// timestamp in seconds
 	CreatedAt int64 `protobuf:"varint,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	// Deprecated: Marked as deprecated in livekit_webhook.proto.
-	NumDropped    int32 `protobuf:"varint,11,opt,name=num_dropped,json=numDropped,proto3" json:"num_dropped,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	NumDropped      int32            `protobuf:"varint,11,opt,name=num_dropped,json=numDropped,proto3" json:"num_dropped,omitempty"`
+	SipTransferInfo *SIPTransferInfo `protobuf:"bytes,12,opt,name=sip_transfer_info,json=sipTransferInfo,proto3" json:"sip_transfer_info,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *WebhookEvent) Reset() {
@@ -154,11 +155,18 @@ func (x *WebhookEvent) GetNumDropped() int32 {
 	return 0
 }
 
+func (x *WebhookEvent) GetSipTransferInfo() *SIPTransferInfo {
+	if x != nil {
+		return x.SipTransferInfo
+	}
+	return nil
+}
+
 var File_livekit_webhook_proto protoreflect.FileDescriptor
 
 const file_livekit_webhook_proto_rawDesc = "" +
 	"\n" +
-	"\x15livekit_webhook.proto\x12\alivekit\x1a\x14livekit_models.proto\x1a\x14livekit_egress.proto\x1a\x15livekit_ingress.proto\"\xf0\x02\n" +
+	"\x15livekit_webhook.proto\x12\alivekit\x1a\x14livekit_models.proto\x1a\x14livekit_egress.proto\x1a\x15livekit_ingress.proto\x1a\x11livekit_sip.proto\"\xb6\x03\n" +
 	"\fWebhookEvent\x12\x14\n" +
 	"\x05event\x18\x01 \x01(\tR\x05event\x12!\n" +
 	"\x04room\x18\x02 \x01(\v2\r.livekit.RoomR\x04room\x12:\n" +
@@ -172,7 +180,8 @@ const file_livekit_webhook_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\a \x01(\x03R\tcreatedAt\x12#\n" +
 	"\vnum_dropped\x18\v \x01(\x05B\x02\x18\x01R\n" +
-	"numDroppedBFZ#github.com/livekit/protocol/livekit\xaa\x02\rLiveKit.Proto\xea\x02\x0eLiveKit::Protob\x06proto3"
+	"numDropped\x12D\n" +
+	"\x11sip_transfer_info\x18\f \x01(\v2\x18.livekit.SIPTransferInfoR\x0fsipTransferInfoBFZ#github.com/livekit/protocol/livekit\xaa\x02\rLiveKit.Proto\xea\x02\x0eLiveKit::Protob\x06proto3"
 
 var (
 	file_livekit_webhook_proto_rawDescOnce sync.Once
@@ -194,6 +203,7 @@ var file_livekit_webhook_proto_goTypes = []any{
 	(*EgressInfo)(nil),      // 3: livekit.EgressInfo
 	(*IngressInfo)(nil),     // 4: livekit.IngressInfo
 	(*TrackInfo)(nil),       // 5: livekit.TrackInfo
+	(*SIPTransferInfo)(nil), // 6: livekit.SIPTransferInfo
 }
 var file_livekit_webhook_proto_depIdxs = []int32{
 	1, // 0: livekit.WebhookEvent.room:type_name -> livekit.Room
@@ -201,11 +211,12 @@ var file_livekit_webhook_proto_depIdxs = []int32{
 	3, // 2: livekit.WebhookEvent.egress_info:type_name -> livekit.EgressInfo
 	4, // 3: livekit.WebhookEvent.ingress_info:type_name -> livekit.IngressInfo
 	5, // 4: livekit.WebhookEvent.track:type_name -> livekit.TrackInfo
-	5, // [5:5] is the sub-list for method output_type
-	5, // [5:5] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	6, // 5: livekit.WebhookEvent.sip_transfer_info:type_name -> livekit.SIPTransferInfo
+	6, // [6:6] is the sub-list for method output_type
+	6, // [6:6] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_livekit_webhook_proto_init() }
@@ -216,6 +227,7 @@ func file_livekit_webhook_proto_init() {
 	file_livekit_models_proto_init()
 	file_livekit_egress_proto_init()
 	file_livekit_ingress_proto_init()
+	file_livekit_sip_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
