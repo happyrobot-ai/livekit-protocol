@@ -55,7 +55,8 @@ type WebhookEvent struct {
 	// timestamp in seconds
 	CreatedAt int64 `protobuf:"varint,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	// Deprecated: Marked as deprecated in livekit_webhook.proto.
-	NumDropped      int32            `protobuf:"varint,11,opt,name=num_dropped,json=numDropped,proto3" json:"num_dropped,omitempty"`
+	NumDropped int32 `protobuf:"varint,11,opt,name=num_dropped,json=numDropped,proto3" json:"num_dropped,omitempty"`
+	// sip transfer info
 	SipTransferInfo *SIPTransferInfo `protobuf:"bytes,12,opt,name=sip_transfer_info,json=sipTransferInfo,proto3" json:"sip_transfer_info,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
