@@ -23,8 +23,10 @@ option ruby_package = "LiveKit::Proto";
 import "google/protobuf/any.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 import "livekit_models.proto";
 import "livekit_room.proto";
+import "logger/options.proto";
 
 /*
    LiveKit's SIP API is built with 3 high level primitives
@@ -84,13 +86,17 @@ enum SIPStatusCode {
     SIP_STATUS_CALL_IS_FORWARDED = 181;
     SIP_STATUS_QUEUED = 182;
     SIP_STATUS_SESSION_PROGRESS = 183;
+    SIP_STATUS_EARLY_DIALOG_TERMINATED = 199;
 
     SIP_STATUS_OK = 200;
     SIP_STATUS_ACCEPTED = 202;
+    SIP_STATUS_NO_NOTIFICATION = 204;
 
+    SIP_STATUS_MULTIPLE_CHOICES = 300;
     SIP_STATUS_MOVED_PERMANENTLY = 301;
     SIP_STATUS_MOVED_TEMPORARILY = 302;
     SIP_STATUS_USE_PROXY = 305;
+    SIP_STATUS_ALTERNATIVE_SERVICE = 380;
 
     SIP_STATUS_BAD_REQUEST = 400;
     SIP_STATUS_UNAUTHORIZED = 401;
@@ -103,13 +109,30 @@ enum SIPStatusCode {
     SIP_STATUS_REQUEST_TIMEOUT = 408;
     SIP_STATUS_CONFLICT = 409;
     SIP_STATUS_GONE = 410;
+    SIP_STATUS_LENGTH_REQUIRED = 411;
+    SIP_STATUS_CONDITIONAL_REQUEST_FAILED = 412;
     SIP_STATUS_REQUEST_ENTITY_TOO_LARGE = 413;
     SIP_STATUS_REQUEST_URI_TOO_LONG = 414;
     SIP_STATUS_UNSUPPORTED_MEDIA_TYPE = 415;
     SIP_STATUS_REQUESTED_RANGE_NOT_SATISFIABLE = 416;
+    SIP_STATUS_UNKNOWN_RESOURCE_PRIORITY = 417;
     SIP_STATUS_BAD_EXTENSION = 420;
     SIP_STATUS_EXTENSION_REQUIRED = 421;
+    SIP_STATUS_SESSION_INTERVAL_TOO_SMALL = 422;
     SIP_STATUS_INTERVAL_TOO_BRIEF = 423;
+    SIP_STATUS_BAD_LOCATION_INFORMATION = 424;
+    SIP_STATUS_BAD_ALERT_MESSAGE = 425;
+    SIP_STATUS_USE_IDENTITY_HEADER = 428;
+    SIP_STATUS_PROVIDE_REFERRER_IDENTITY = 429;
+    SIP_STATUS_FLOW_FAILED = 430;
+    SIP_STATUS_ANONYMITY_DISALLOWED = 433;
+    SIP_STATUS_BAD_IDENTITY_INFO = 436;
+    SIP_STATUS_UNSUPPORTED_CERTIFICATE = 437;
+    SIP_STATUS_INVALID_IDENTITY_HEADER = 438;
+    SIP_STATUS_FIRST_HOP_LACKS_OUTBOUND_SUPPORT = 439;
+    SIP_STATUS_MAX_BREADTH_EXCEEDED = 440;
+    SIP_STATUS_BAD_INFO_PACKAGE = 469;
+    SIP_STATUS_CONSENT_NEEDED = 470;
     SIP_STATUS_TEMPORARILY_UNAVAILABLE = 480;
     SIP_STATUS_CALL_TRANSACTION_DOES_NOT_EXISTS = 481;
     SIP_STATUS_LOOP_DETECTED = 482;
@@ -119,6 +142,10 @@ enum SIPStatusCode {
     SIP_STATUS_BUSY_HERE = 486;
     SIP_STATUS_REQUEST_TERMINATED = 487;
     SIP_STATUS_NOT_ACCEPTABLE_HERE = 488;
+    SIP_STATUS_BAD_EVENT = 489;
+    SIP_STATUS_REQUEST_PENDING = 491;
+    SIP_STATUS_UNDECIPHERABLE = 493;
+    SIP_STATUS_SECURITY_AGREEMENT_REQUIRED = 494;
 
     SIP_STATUS_INTERNAL_SERVER_ERROR = 500;
     SIP_STATUS_NOT_IMPLEMENTED = 501;
@@ -132,6 +159,8 @@ enum SIPStatusCode {
     SIP_STATUS_GLOBAL_DECLINE = 603;
     SIP_STATUS_GLOBAL_DOES_NOT_EXIST_ANYWHERE = 604;
     SIP_STATUS_GLOBAL_NOT_ACCEPTABLE = 606;
+    SIP_STATUS_GLOBAL_UNWANTED = 607;
+    SIP_STATUS_GLOBAL_REJECTED = 608;
 }
 
 // SIPStatus is returned as an error detail in CreateSIPParticipant.
@@ -161,15 +190,18 @@ message CreateSIPTrunkRequest {
 
   // Username and password used to authenticate inbound and outbound SIP invites
   // May be empty to have no Authentication
-  string inbound_username = 5;
-  string inbound_password = 6;
-  string outbound_username = 7;
-  string outbound_password = 8;
+  string inbound_username = 5 [(logger.redact) = true];
+  string inbound_password = 6 [(logger.redact) = true];
+  string outbound_username = 7 [(logger.redact) = true];
+  string outbound_password = 8 [(logger.redact) = true];
 
   // Optional human-readable name for the Trunk.
   string name = 10;
   // Optional user-defined metadata for the Trunk.
-  string metadata = 11;
+  string metadata = 11 [
+    (logger.redact) = true,
+    (logger.redact_format) = "<redacted ({{ .Size }} bytes)>"
+  ];
 }
 
 enum SIPTransport {
@@ -213,7 +245,7 @@ message SIPTrunkInfo {
     TRUNK_OUTBOUND = 2;
   }
 
-  string sip_trunk_id = 1;
+  string sip_trunk_id = 1 [(logger.name) = "sipTrunkID"];
   TrunkKind kind = 14;
 
   // CIDR or IPs that traffic is accepted from
@@ -238,15 +270,18 @@ message SIPTrunkInfo {
 
   // Username and password used to authenticate inbound and outbound SIP invites
   // May be empty to have no Authentication
-  string inbound_username = 6;
-  string inbound_password = 7;
-  string outbound_username = 8;
-  string outbound_password = 9;
+  string inbound_username = 6 [(logger.redact) = true];
+  string inbound_password = 7 [(logger.redact) = true];
+  string outbound_username = 8 [(logger.redact) = true];
+  string outbound_password = 9 [(logger.redact) = true];
 
   // Human-readable name for the Trunk.
   string name = 11;
   // User-defined metadata for the Trunk.
-  string metadata = 12;
+  string metadata = 12 [
+    (logger.redact) = true,
+    (logger.redact_format) = "<redacted ({{ .Size }} bytes)>"
+  ];
 
   // NEXT ID: 15
 }
@@ -256,7 +291,7 @@ message CreateSIPInboundTrunkRequest {
 }
 
 message UpdateSIPInboundTrunkRequest {
-  string sip_trunk_id = 1;
+  string sip_trunk_id = 1 [(logger.name) = "sipTrunkID"];
   oneof action {
     SIPInboundTrunkInfo replace = 2;
     SIPInboundTrunkUpdate update = 3;
@@ -264,12 +299,15 @@ message UpdateSIPInboundTrunkRequest {
 }
 
 message SIPInboundTrunkInfo {
-  string sip_trunk_id = 1;
+  string sip_trunk_id = 1 [(logger.name) = "sipTrunkID"];
 
   // Human-readable name for the Trunk.
   string name = 2;
   // User-defined metadata for the Trunk.
-  string metadata = 3;
+  string metadata = 3 [
+    (logger.redact) = true,
+    (logger.redact_format) = "<redacted ({{ .Size }} bytes)>"
+  ];
 
   // Numbers associated with LiveKit SIP. The Trunk will only accept calls made to these numbers.
   // Creating multiple Trunks with different phone numbers allows having different rules for a single provider.
@@ -285,11 +323,14 @@ message SIPInboundTrunkInfo {
 
   // Username and password used to authenticate inbound SIP invites.
   // May be empty to have no authentication.
-  string auth_username = 7;
-  string auth_password = 8;
+  string auth_username = 7 [(logger.redact) = true];
+  string auth_password = 8 [(logger.redact) = true];
 
   // Include these SIP X-* headers in 200 OK responses.
-  map<string, string> headers = 9;
+  map<string, string> headers = 9 [
+    (logger.redact) = true,
+    (logger.redact_format) = "<redacted ({{ .Size }} bytes)>"
+  ];
   // Map SIP X-* headers from INVITE to SIP participant attributes.
   map<string, string> headers_to_attributes = 10;
   // Map LiveKit attributes to SIP X-* headers when sending BYE or REFER requests.
@@ -311,17 +352,23 @@ message SIPInboundTrunkInfo {
   bool krisp_enabled = 13;
   SIPMediaEncryption media_encryption = 16;
 
-  // NEXT ID: 17
+  google.protobuf.Timestamp created_at = 17;
+  google.protobuf.Timestamp updated_at = 18;
+
+  // NEXT ID: 19
 }
 
 message SIPInboundTrunkUpdate {
   ListUpdate numbers = 1;
   ListUpdate allowed_addresses = 2;
   ListUpdate allowed_numbers = 3;
-  optional string auth_username = 4;
-  optional string auth_password = 5;
+  optional string auth_username = 4 [(logger.redact) = true];
+  optional string auth_password = 5 [(logger.redact) = true];
   optional string name = 6;
-  optional string metadata = 7;
+  optional string metadata = 7 [
+    (logger.redact) = true,
+    (logger.redact_format) = "<redacted ({{ .Size }} bytes)>"
+  ];
   optional SIPMediaEncryption media_encryption = 8;
 }
 
@@ -330,7 +377,7 @@ message CreateSIPOutboundTrunkRequest {
 }
 
 message UpdateSIPOutboundTrunkRequest {
-  string sip_trunk_id = 1;
+  string sip_trunk_id = 1 [(logger.name) = "sipTrunkID"];
   oneof action {
     SIPOutboundTrunkInfo replace = 2;
     SIPOutboundTrunkUpdate update = 3;
@@ -338,12 +385,15 @@ message UpdateSIPOutboundTrunkRequest {
 }
 
 message SIPOutboundTrunkInfo {
-  string sip_trunk_id = 1;
+  string sip_trunk_id = 1 [(logger.name) = "sipTrunkID"];
 
   // Human-readable name for the Trunk.
   string name = 2;
   // User-defined metadata for the Trunk.
-  string metadata = 3;
+  string metadata = 3 [
+    (logger.redact) = true,
+    (logger.redact_format) = "<redacted ({{ .Size }} bytes)>"
+  ];
 
   // Hostname or IP that SIP INVITE is sent too.
   // Note that this is not a SIP URI and should not contain the 'sip:' protocol prefix.
@@ -360,12 +410,15 @@ message SIPOutboundTrunkInfo {
 
   // Username and password used to authenticate with SIP server.
   // May be empty to have no authentication.
-  string auth_username = 7;
-  string auth_password = 8;
+  string auth_username = 7 [(logger.redact) = true];
+  string auth_password = 8 [(logger.redact) = true];
 
   // Include these SIP X-* headers in INVITE request.
   // These headers are sent as-is and may help identify this call as coming from LiveKit for the other SIP endpoint.
-  map<string, string> headers = 9;
+  map<string, string> headers = 9 [
+    (logger.redact) = true,
+    (logger.redact_format) = "<redacted ({{ .Size }} bytes)>"
+  ];
   // Map SIP X-* headers from 200 OK to SIP participant attributes.
   // Keys are the names of X-* headers and values are the names of attributes they will be mapped to.
   map<string, string> headers_to_attributes = 10;
@@ -382,7 +435,15 @@ message SIPOutboundTrunkInfo {
 
   SIPMediaEncryption media_encryption = 13;
 
-  // NEXT ID: 15
+  // Optional custom hostname for the 'From' SIP header in outbound INVITEs.
+  // When set, outbound calls from this trunk will use this host instead of the default project SIP domain.
+  // Enables originating calls from custom domains.
+  string from_host = 15;
+
+  google.protobuf.Timestamp created_at = 16;
+  google.protobuf.Timestamp updated_at = 17;
+
+  // NEXT ID: 18
 }
 
 message SIPOutboundTrunkUpdate {
@@ -390,17 +451,21 @@ message SIPOutboundTrunkUpdate {
   optional SIPTransport transport = 2;
   optional string destination_country = 9;
   ListUpdate numbers = 3;
-  optional string auth_username = 4;
-  optional string auth_password = 5;
+  optional string auth_username = 4 [(logger.redact) = true];
+  optional string auth_password = 5 [(logger.redact) = true];
   optional string name = 6;
-  optional string metadata = 7;
+  optional string metadata = 7 [
+    (logger.redact) = true,
+    (logger.redact_format) = "<redacted ({{ .Size }} bytes)>"
+  ];
   optional SIPMediaEncryption media_encryption = 8;
+  optional string from_host = 10;
 
-  // NEXT ID: 10
+  // NEXT ID: 11
 }
 
 message GetSIPInboundTrunkRequest {
-  string sip_trunk_id = 1;
+  string sip_trunk_id = 1 [(logger.name) = "sipTrunkID"];
 }
 
 message GetSIPInboundTrunkResponse {
@@ -408,7 +473,7 @@ message GetSIPInboundTrunkResponse {
 }
 
 message GetSIPOutboundTrunkRequest {
-  string sip_trunk_id = 1;
+  string sip_trunk_id = 1 [(logger.name) = "sipTrunkID"];
 }
 
 message GetSIPOutboundTrunkResponse {
@@ -454,7 +519,7 @@ message ListSIPOutboundTrunkResponse {
 }
 
 message DeleteSIPTrunkRequest {
-  string sip_trunk_id = 1;
+  string sip_trunk_id = 1 [(logger.name) = "sipTrunkID"];
 }
 
 message SIPDispatchRuleDirect {
@@ -471,6 +536,9 @@ message SIPDispatchRuleIndividual {
 
   // Optional pin required to enter room
   string pin = 2;
+
+  // Optionally append random suffix
+  bool no_randomness = 3;
 }
 
 message SIPDispatchRuleCallee {
@@ -519,10 +587,18 @@ message CreateSIPDispatchRuleRequest {
   string name = 4 [deprecated=true];
   // User-defined metadata for the Dispatch Rule.
   // Participants created by this rule will inherit this metadata.
-  string metadata = 5 [deprecated=true];
+  string metadata = 5 [
+    deprecated=true,
+    (logger.redact) = true,
+    (logger.redact_format) = "<redacted ({{ .Size }} bytes)>"
+  ];
   // User-defined attributes for the Dispatch Rule.
   // Participants created by this rule will inherit these attributes.
-  map<string, string> attributes = 7 [deprecated=true];
+  map<string, string> attributes = 7 [
+    deprecated=true,
+    (logger.redact) = true,
+    (logger.redact_format) = "<redacted ({{ .Size }} bytes)>"
+  ];
 
   // Cloud-only, config preset to use
   string room_preset = 8 [deprecated=true];
@@ -534,7 +610,7 @@ message CreateSIPDispatchRuleRequest {
 }
 
 message UpdateSIPDispatchRuleRequest {
-  string sip_dispatch_rule_id = 1;
+  string sip_dispatch_rule_id = 1 [(logger.name) = "sipDispatchRuleID"];
   oneof action {
     SIPDispatchRuleInfo replace = 2;
     SIPDispatchRuleUpdate update = 3;
@@ -542,21 +618,30 @@ message UpdateSIPDispatchRuleRequest {
 }
 
 message SIPDispatchRuleInfo {
-  string sip_dispatch_rule_id = 1;
+  string sip_dispatch_rule_id = 1 [(logger.name) = "sipDispatchRuleID"];
   SIPDispatchRule rule = 2;
   repeated string trunk_ids = 3;
   bool hide_phone_number = 4;
-  // Dispatch Rule will only accept a call made to these numbers (if set).
+  // Dispatch Rule will only accept a call made from these numbers (if set).
   repeated string inbound_numbers = 7;
+
+  // Dispatch Rule will only accept a call made to these numbers (if set).
+  repeated string numbers = 13;
 
   // Human-readable name for the Dispatch Rule.
   string name = 5;
   // User-defined metadata for the Dispatch Rule.
   // Participants created by this rule will inherit this metadata.
-  string metadata = 6;
+  string metadata = 6 [
+    (logger.redact) = true,
+    (logger.redact_format) = "<redacted ({{ .Size }} bytes)>"
+  ];
   // User-defined attributes for the Dispatch Rule.
   // Participants created by this rule will inherit these attributes.
-  map<string, string> attributes = 8;
+  map<string, string> attributes = 8 [
+    (logger.redact) = true,
+    (logger.redact_format) = "<redacted ({{ .Size }} bytes)>"
+  ];
 
   // Cloud-only, config preset to use
   string room_preset = 9;
@@ -566,15 +651,25 @@ message SIPDispatchRuleInfo {
 
   bool krisp_enabled = 11;
   SIPMediaEncryption media_encryption = 12;
-  // NEXT ID: 13
+
+  google.protobuf.Timestamp created_at = 14;
+  google.protobuf.Timestamp updated_at = 15;
+
+  // NEXT ID: 16
 }
 
 message SIPDispatchRuleUpdate {
   ListUpdate trunk_ids = 1;
   SIPDispatchRule rule = 2;
   optional string name = 3;
-  optional string metadata = 4;
-  map<string, string> attributes = 5;
+  optional string metadata = 4 [
+    (logger.redact) = true,
+    (logger.redact_format) = "<redacted ({{ .Size }} bytes)>"
+  ];
+  map<string, string> attributes = 5 [
+    (logger.redact) = true,
+    (logger.redact_format) = "<redacted ({{ .Size }} bytes)>"
+  ];
   optional SIPMediaEncryption media_encryption = 6;
 }
 
@@ -593,7 +688,7 @@ message ListSIPDispatchRuleResponse {
 }
 
 message DeleteSIPDispatchRuleRequest {
-  string sip_dispatch_rule_id = 1;
+  string sip_dispatch_rule_id = 1 [(logger.name) = "sipDispatchRuleID"];
 }
 
 message SIPOutboundConfig {
@@ -608,8 +703,8 @@ message SIPOutboundConfig {
 
   // Username and password used to authenticate with SIP server.
   // May be empty to have no authentication.
-  string auth_username = 3;
-  string auth_password = 4;
+  string auth_username = 3 [(logger.redact) = true];
+  string auth_password = 4 [(logger.redact) = true];
 
   // Map SIP X-* headers from 200 OK to SIP participant attributes.
   // Keys are the names of X-* headers and values are the names of attributes they will be mapped to.
@@ -618,14 +713,17 @@ message SIPOutboundConfig {
   // Keys are the names of attributes and values are the names of X-* headers they will be mapped to.
   map<string, string> attributes_to_headers = 6;
 
-  // NEXT ID: 7
+  // Optional custom hostname for the 'From' SIP header. When set, outbound calls use this host instead of the default project SIP domain.
+  string from_host = 8;
+
+  // NEXT ID: 9
 }
 
 // A SIP Participant is a singular SIP session connected to a LiveKit room via
 // a SIP Trunk into a SIP DispatchRule
 message CreateSIPParticipantRequest {
   // What SIP Trunk should be used to dial the user
-  string sip_trunk_id = 1;
+  string sip_trunk_id = 1 [(logger.name) = "sipTrunkID"];
   SIPOutboundConfig trunk = 20;
 
   // What number should be dialed via SIP
@@ -641,12 +739,21 @@ message CreateSIPParticipantRequest {
   string participant_identity = 4;
 
   // Optional name of the participant in LiveKit room
-  string participant_name = 7;
+  string participant_name = 7 [
+    (logger.redact) = true,
+    (logger.redact_format) = "<redacted ({{ .Size }} bytes)>"
+  ];
 
   // Optional user-defined metadata. Will be attached to a created Participant in the room.
-  string participant_metadata = 8;
+  string participant_metadata = 8 [
+    (logger.redact) = true,
+    (logger.redact_format) = "<redacted ({{ .Size }} bytes)>"
+  ];
   // Optional user-defined attributes. Will be attached to a created Participant in the room.
-  map<string, string> participant_attributes = 9;
+  map<string, string> participant_attributes = 9 [
+    (logger.redact) = true,
+    (logger.redact_format) = "<redacted ({{ .Size }} bytes)>"
+  ];
 
   // Optionally send following DTMF digits (extension codes) when making a call.
   // Character 'w' can be used to add a 0.5 sec delay.
@@ -661,7 +768,10 @@ message CreateSIPParticipantRequest {
   bool hide_phone_number = 10;
 
   // These headers are sent as-is and may help identify this call as coming from LiveKit for the other SIP endpoint.
-  map<string, string> headers = 16;
+  map<string, string> headers = 16 [
+    (logger.redact) = true,
+    (logger.redact_format) = "<redacted ({{ .Size }} bytes)>"
+  ];
   // Map SIP headers from 200 OK to sip.h.* participant attributes automatically.
   //
   // When the names of required headers is known, using headers_to_attributes is strongly recommended.
@@ -689,16 +799,19 @@ message CreateSIPParticipantRequest {
   // 1) Unspecified: Use legacy behavior - display name will be set to be the caller's number.
   // 2) Empty string: Do not send a display name, which will result in a CNAM lookup downstream.
   // 3) Non-empty: Use the specified value as the display name.
-  optional string display_name = 21;
+  optional string display_name = 21 [
+    (logger.redact) = true,
+    (logger.redact_format) = "<redacted ({{ .Size }} bytes)>"
+  ];
   optional Destination destination = 22;
   // NEXT ID: 23
 }
 
 message SIPParticipantInfo {
-  string participant_id = 1;
+  string participant_id = 1 [(logger.name) = "participantID"];
   string participant_identity = 2;
   string room_name = 3;
-  string sip_call_id = 4;
+  string sip_call_id = 4 [(logger.name) = "sipCallID"];
 }
 
 message TransferSIPParticipantRequest {
@@ -710,7 +823,10 @@ message TransferSIPParticipantRequest {
   bool play_dialtone = 4;
 
   // Add the following headers to the REFER SIP request.
-  map<string, string> headers = 5;
+  map<string, string> headers = 5 [
+    (logger.redact) = true,
+    (logger.redact_format) = "<redacted ({{ .Size }} bytes)>"
+  ];
 
   // Max time for the transfer destination to answer the call.
   google.protobuf.Duration ringing_timeout = 6;
@@ -718,14 +834,17 @@ message TransferSIPParticipantRequest {
 
 
 message SIPCallInfo {
-  string call_id = 1;
-  string trunk_id = 2;
-  string dispatch_rule_id = 16;
+  string call_id = 1 [(logger.name) = "callID"];
+  string trunk_id = 2 [(logger.name) = "trunkID"];
+  string dispatch_rule_id = 16 [(logger.name) = "dispatchRuleID"];
   string region = 17;
   string room_name = 3;
-  string room_id = 4; // ID of the current/previous room published to
+  string room_id = 4 [(logger.name) = "roomID"]; // ID of the current/previous room published to
   string participant_identity = 5;
-  map<string, string> participant_attributes = 18;
+  map<string, string> participant_attributes = 18 [
+    (logger.redact) = true,
+    (logger.redact_format) = "<redacted ({{ .Size }} bytes)>"
+  ];
   SIPUri from_uri = 6;
   SIPUri to_uri = 7;
   int64 created_at = 9 [ deprecated = true ];
@@ -745,13 +864,14 @@ message SIPCallInfo {
   string pcap_file_link = 25;
   repeated google.protobuf.Any call_context = 26;
   ProviderInfo provider_info = 27;
+  string sip_call_id = 28 [(logger.name) = "sipCallID"];
 
-  // NEXT ID: 28
+  // NEXT ID: 29
 }
 
 message SIPTransferInfo {
-  string transfer_id = 1;
-  string call_id = 2;
+  string transfer_id = 1 [(logger.name) = "transferID"];
+  string call_id = 2 [(logger.name) = "callID"];
   string transfer_to = 3;
   int64 transfer_initiated_at_ns = 4;
   int64 transfer_completed_at_ns = 5;

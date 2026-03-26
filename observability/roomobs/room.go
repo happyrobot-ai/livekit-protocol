@@ -49,7 +49,6 @@ func ToClientOS(os string) ClientOS {
 
 func FormatBrowser(clientInfo *livekit.ClientInfo) string {
 	return strings.TrimSpace(fmt.Sprintf("%s %s", clientInfo.GetBrowser(), clientInfo.GetBrowserVersion()))
-
 }
 
 func FormatSDKVersion(clientInfo *livekit.ClientInfo) string {
@@ -94,5 +93,38 @@ func TrackSourceFromProto(p livekit.TrackSource) TrackSource {
 		return TrackSourceScreenShareAudio
 	default:
 		return TrackSourceUndefined
+	}
+}
+
+type RoomFeature uint16
+
+func (f RoomFeature) HasIngress() bool   { return f&IngressRoomFeature != 0 }
+func (f RoomFeature) HasEgress() bool    { return f&EgressRoomFeature != 0 }
+func (f RoomFeature) HasSIP() bool       { return f&SIPRoomFeature != 0 }
+func (f RoomFeature) HasAgent() bool     { return f&AgentRoomFeature != 0 }
+func (f RoomFeature) HasConnector() bool { return f&ConnectorRoomFeature != 0 }
+
+const (
+	IngressRoomFeature RoomFeature = 1 << iota
+	EgressRoomFeature
+	SIPRoomFeature
+	AgentRoomFeature
+	ConnectorRoomFeature
+)
+
+func RoomFeatureFromParticipantKind(k livekit.ParticipantInfo_Kind) RoomFeature {
+	switch k {
+	case livekit.ParticipantInfo_INGRESS:
+		return IngressRoomFeature
+	case livekit.ParticipantInfo_EGRESS:
+		return EgressRoomFeature
+	case livekit.ParticipantInfo_SIP:
+		return SIPRoomFeature
+	case livekit.ParticipantInfo_AGENT:
+		return AgentRoomFeature
+	case livekit.ParticipantInfo_CONNECTOR:
+		return ConnectorRoomFeature
+	default:
+		return 0
 	}
 }

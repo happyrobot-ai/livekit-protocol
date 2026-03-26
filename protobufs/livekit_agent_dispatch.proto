@@ -20,6 +20,7 @@ option csharp_namespace = "LiveKit.Proto";
 option ruby_package = "LiveKit::Proto";
 
 import "livekit_agent.proto";
+import "logger/options.proto";
 
 service AgentDispatchService {
   rpc CreateDispatch(CreateAgentDispatchRequest) returns (AgentDispatch);
@@ -30,21 +31,21 @@ service AgentDispatchService {
 message CreateAgentDispatchRequest {
   string agent_name = 1;
   string room = 2;
-  string metadata = 3;
+  string metadata = 3 [(logger.redact) = true];
 }
 
 message RoomAgentDispatch {
   string agent_name = 1;
-  string metadata = 2;
+  string metadata = 2 [(logger.redact) = true];
 }
 
 message DeleteAgentDispatchRequest {
-  string dispatch_id = 1;
+  string dispatch_id = 1 [(logger.name) = "dispatchID"];
   string room = 2;
 }
 
 message ListAgentDispatchRequest {
-  string dispatch_id = 1; // if set, only the dispatch whose id is given will be returned
+  string dispatch_id = 1 [(logger.name) = "dispatchID"]; // if set, only the dispatch whose id is given will be returned
   string room = 2;        // name of the room to list agents for. Must be set.
 }
 
@@ -56,12 +57,12 @@ message AgentDispatch {
   string id = 1;
   string agent_name = 2;
   string room = 3;
-  string metadata = 4;
+  string metadata = 4 [(logger.redact) = true];
   AgentDispatchState state = 5;
 }
 
 message AgentDispatchState {
-  // For dispatches of tyoe JT_ROOM, there will be at most 1 job. 
+  // For dispatches of tyoe JT_ROOM, there will be at most 1 job.
   // For dispatches of type JT_PUBLISHER, there will be 1 per publisher.
   repeated Job jobs = 1;
   int64 created_at = 2;
