@@ -380,6 +380,16 @@ func TestTransferSIPParticipantRequestValidate(t *testing.T) {
 			expectedURI: "<sip:+15105550100@sip.telnyx.com>",
 		},
 		{
+			name: "valid sips URI without brackets",
+			req: &TransferSIPParticipantRequest{
+				RoomName:            "room1",
+				ParticipantIdentity: "participant1",
+				TransferTo:          "sips:+15105550100@sip.telnyx.com",
+			},
+			expectError: false,
+			expectedURI: "<sips:+15105550100@sip.telnyx.com>",
+		},
+		{
 			name: "valid tel URI without brackets",
 			req: &TransferSIPParticipantRequest{
 				RoomName:            "room1",
@@ -398,6 +408,16 @@ func TestTransferSIPParticipantRequestValidate(t *testing.T) {
 			},
 			expectError: false,
 			expectedURI: "<sip:+15105550100@sip.telnyx.com>",
+		},
+		{
+			name: "valid sips URI with brackets",
+			req: &TransferSIPParticipantRequest{
+				RoomName:            "room1",
+				ParticipantIdentity: "participant1",
+				TransferTo:          "<sips:+15105550100@sip.telnyx.com>",
+			},
+			expectError: false,
+			expectedURI: "<sips:+15105550100@sip.telnyx.com>",
 		},
 		{
 			name: "valid tel URI with brackets",
@@ -561,7 +581,7 @@ func TestGRPCStatus(t *testing.T) {
 	e := &SIPStatus{Code: SIPStatusCode_SIP_STATUS_BUSY_HERE}
 	st, ok := status.FromError(e)
 	require.True(t, ok)
-	require.Equal(t, codes.Unavailable, st.Code())
+	require.Equal(t, codes.ResourceExhausted, st.Code())
 	require.Equal(t, "sip status 486: BUSY_HERE", st.Message())
 	details := st.Details()
 	require.Len(t, details, 1)
