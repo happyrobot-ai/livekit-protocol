@@ -1,5 +1,15 @@
 # @livekit/protocol
 
+## 1.45.4
+
+### Patch Changes
+
+- Create room tags - [#1504](https://github.com/livekit/protocol/pull/1504) ([@paulwe](https://github.com/paulwe))
+
+- Export analytics proto - [#1501](https://github.com/livekit/protocol/pull/1501) ([@lukasIO](https://github.com/lukasIO))
+
+- move proto options to use lk reserved range - [#1495](https://github.com/livekit/protocol/pull/1495) ([@paulwe](https://github.com/paulwe))
+
 ## 1.45.3
 
 ### Patch Changes
