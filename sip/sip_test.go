@@ -17,7 +17,6 @@ package sip
 import (
 	"fmt"
 	"net/netip"
-	"regexp"
 	"strconv"
 	"testing"
 	"time"
@@ -758,7 +757,6 @@ func TestEvaluateDispatchRule(t *testing.T) {
 	const caller = "+15551234567"
 	const callee = "+3333"
 	const prefix = "testPrefix"
-	var quotedCaller = regexp.QuoteMeta(caller)
 
 	req := &rpc.EvaluateSIPDispatchRulesRequest{
 		SipCallId:     "call-id",
@@ -851,6 +849,11 @@ func TestEvaluateDispatchRule(t *testing.T) {
 		require.True(t, proto.Equal(exp, res), "%v\nvs\n%v", exp, res)
 	})
 	t.Run("Individual", func(t *testing.T) {
+		// HappyRobot fork: the caller phone number is intentionally NOT included
+		// in individual-dispatch room names (see the "Remove phone number from
+		// room name" patch). Upstream asserts res.RoomName contains `caller`;
+		// our fork replaces the number with a random guid, so these subtests
+		// assert the number is absent and the structure is preserved.
 		t.Run("minimal", func(t *testing.T) {
 			testDR := livekit.SIPDispatchRuleInfo{
 				SipDispatchRuleId: "rule",
@@ -859,7 +862,8 @@ func TestEvaluateDispatchRule(t *testing.T) {
 			res, err := EvaluateDispatchRule(projectID, tr, &testDR, req)
 			require.NoError(t, err)
 			require.Equal(t, rpc.SIPDispatchResult_ACCEPT, res.Result)
-			require.Equal(t, caller, res.RoomName, "room name should be from")
+			require.NotContains(t, res.RoomName, caller, "room name must not leak the caller phone number")
+			require.Regexp(t, `^[a-zA-Z0-9]+$`, res.RoomName, "room name should be a single guid")
 		})
 		t.Run("only prefix", func(t *testing.T) {
 			testDR := livekit.SIPDispatchRuleInfo{
@@ -869,7 +873,8 @@ func TestEvaluateDispatchRule(t *testing.T) {
 			res, err := EvaluateDispatchRule(projectID, tr, &testDR, req)
 			require.NoError(t, err)
 			require.Equal(t, rpc.SIPDispatchResult_ACCEPT, res.Result)
-			require.Equal(t, prefix+"_"+caller, res.RoomName)
+			require.NotContains(t, res.RoomName, caller, "room name must not leak the caller phone number")
+			require.Regexp(t, `^`+prefix+`_[a-zA-Z0-9]+$`, res.RoomName, "room name should be prefix_guid")
 		})
 		t.Run("only randomize", func(t *testing.T) {
 			testDR := livekit.SIPDispatchRuleInfo{
@@ -879,7 +884,8 @@ func TestEvaluateDispatchRule(t *testing.T) {
 			res, err := EvaluateDispatchRule(projectID, tr, &testDR, req)
 			require.NoError(t, err)
 			require.Equal(t, rpc.SIPDispatchResult_ACCEPT, res.Result)
-			require.Regexp(t, `^`+regexp.QuoteMeta(caller)+`_[a-zA-Z0-9]+$`, res.RoomName, "room name should be from_guid")
+			require.NotContains(t, res.RoomName, caller, "room name must not leak the caller phone number")
+			require.Regexp(t, `^[a-zA-Z0-9]+_[a-zA-Z0-9]+$`, res.RoomName, "room name should be guid_guid")
 		})
 		t.Run("only pin", func(t *testing.T) {
 			testDR := livekit.SIPDispatchRuleInfo{
@@ -899,7 +905,8 @@ func TestEvaluateDispatchRule(t *testing.T) {
 			res, err := EvaluateDispatchRule(projectID, tr, &testDR, req)
 			require.NoError(t, err)
 			require.Equal(t, rpc.SIPDispatchResult_ACCEPT, res.Result)
-			require.Regexp(t, `^`+prefix+`_`+quotedCaller+`_[a-zA-Z0-9]+$`, res.RoomName, "room name should be prefix_from_guid")
+			require.NotContains(t, res.RoomName, caller, "room name must not leak the caller phone number")
+			require.Regexp(t, `^`+prefix+`_[a-zA-Z0-9]+_[a-zA-Z0-9]+$`, res.RoomName, "room name should be prefix_guid_guid")
 		})
 		t.Run("prefix and pin", func(t *testing.T) {
 			testDR := livekit.SIPDispatchRuleInfo{
@@ -937,6 +944,39 @@ func TestEvaluateDispatchRule(t *testing.T) {
 
 // Regression: trunk-level MediaEncryption must be honored when the dispatch rule specifies
 // neither MediaEncryption nor Media. A prior version called rule.Upgrade() at the top of
+// TestHRIndividualRoomNameOmitsCallerNumber locks in the HappyRobot fork
+// behavior: an individual-dispatch room name must NOT contain the caller's
+// phone number (privacy). This is the carried-forward "Remove phone number
+// from room name" patch. It is written using only proto fields that exist on
+// both the v1.42.x and v1.45.x protocol lines so the identical test runs on
+// the pre-upgrade fork (v1.42.33) and the rebased fork (v1.45.9), proving the
+// behavior survived the upgrade unchanged.
+func TestHRIndividualRoomNameOmitsCallerNumber(t *testing.T) {
+	const caller = "+15551234567"
+	const prefix = "hrprefix"
+	req := &rpc.EvaluateSIPDispatchRulesRequest{
+		CallingNumber: caller,
+		CalledNumber:  "+3333",
+	}
+	tr := &livekit.SIPInboundTrunkInfo{SipTrunkId: "trunk"}
+	dr := &livekit.SIPDispatchRuleInfo{
+		SipDispatchRuleId: "rule",
+		Rule: &livekit.SIPDispatchRule{
+			Rule: &livekit.SIPDispatchRule_DispatchRuleIndividual{
+				DispatchRuleIndividual: &livekit.SIPDispatchRuleIndividual{
+					RoomPrefix: prefix,
+				},
+			},
+		},
+	}
+	res, err := EvaluateDispatchRule("p_123", tr, dr, req)
+	require.NoError(t, err)
+	require.Equal(t, rpc.SIPDispatchResult_ACCEPT, res.Result)
+	require.NotContains(t, res.RoomName, caller, "HR: individual room name must not leak the caller phone number")
+	// HappyRobot always configures a non-empty room prefix; the name keeps it.
+	require.Regexp(t, `^`+prefix+`_`, res.RoomName, "room name should start with the configured prefix")
+}
+
 // EvaluateDispatchRule, which pinned rule.Media.Encryption to rule.MediaEncryption (0)
 // before the trunk was consulted, causing the inbound trunk's encryption setting to be
 // silently dropped.
