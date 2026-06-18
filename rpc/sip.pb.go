@@ -595,9 +595,9 @@ const file_rpc_sip_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a?\n" +
 	"\x11FeatureFlagsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x012\xf7\x01\n" +
-	"\vSIPInternal\x12s\n" +
-	"\x14CreateSIPParticipant\x12(.rpc.InternalCreateSIPParticipantRequest\x1a).rpc.InternalCreateSIPParticipantResponse\"\x06\xb2\x89\x01\x02\x10\x01\x12s\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x012\xf9\x01\n" +
+	"\vSIPInternal\x12u\n" +
+	"\x14CreateSIPParticipant\x12(.rpc.InternalCreateSIPParticipantRequest\x1a).rpc.InternalCreateSIPParticipantResponse\"\b\xb2\x89\x01\x04\x10\x010\x01\x12s\n" +
 	"\x16TransferSIPParticipant\x12*.rpc.InternalTransferSIPParticipantRequest\x1a\x16.google.protobuf.Empty\"\x15\xb2\x89\x01\x11\x10\x01\x1a\r\x12\vsip_call_idB!Z\x1fgithub.com/livekit/protocol/rpcb\x06proto3"
 
 var (
