@@ -17,7 +17,10 @@ name: Generate
 on:
   workflow_dispatch:
   push:
-    branches-ignore: [main]
+    branches-ignore: [main, hr-main]
+
+permissions:
+  contents: write
 
 jobs:
   generate:
