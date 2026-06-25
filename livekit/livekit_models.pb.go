@@ -3080,7 +3080,9 @@ type DataPacket_EncryptedPacket struct {
 }
 
 type DataPacket_SipInfo struct {
-	SipInfo *SipInfo `protobuf:"bytes,19,opt,name=sip_info,json=sipInfo,proto3,oneof"`
+	// HappyRobot fork-private fields use 100+ to avoid colliding with upstream
+	// additions to this oneof when the fork is rebased (APP-4619).
+	SipInfo *SipInfo `protobuf:"bytes,100,opt,name=sip_info,json=sipInfo,proto3,oneof"`
 }
 
 func (*DataPacket_User) isDataPacket_Value() {}
@@ -6451,7 +6453,7 @@ const file_livekit_models_proto_rawDesc = "" +
 	"\fstream_chunk\x18\x0e \x01(\v2\x19.livekit.DataStream.ChunkH\x00R\vstreamChunk\x12D\n" +
 	"\x0estream_trailer\x18\x0f \x01(\v2\x1b.livekit.DataStream.TrailerH\x00R\rstreamTrailer\x12E\n" +
 	"\x10encrypted_packet\x18\x12 \x01(\v2\x18.livekit.EncryptedPacketH\x00R\x0fencryptedPacket\x12-\n" +
-	"\bsip_info\x18\x13 \x01(\v2\x10.livekit.SipInfoH\x00R\asipInfo\x12\x1a\n" +
+	"\bsip_info\x18d \x01(\v2\x10.livekit.SipInfoH\x00R\asipInfo\x12\x1a\n" +
 	"\bsequence\x18\x10 \x01(\rR\bsequence\x12'\n" +
 	"\x0fparticipant_sid\x18\x11 \x01(\tR\x0eparticipantSid\"\x1f\n" +
 	"\x04Kind\x12\f\n" +
