@@ -192,6 +192,15 @@ func (p *SipDTMF) ToProto() *DataPacket {
 	}
 }
 
+// ToProto implements DataPacket in Go SDK.
+func (p *SipInfo) ToProto() *DataPacket {
+	return &DataPacket{
+		Value: &DataPacket_SipInfo{
+			SipInfo: p,
+		},
+	}
+}
+
 func (p *SIPTrunkInfo) ID() string {
 	if p == nil {
 		return ""

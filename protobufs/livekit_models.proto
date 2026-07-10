@@ -354,13 +354,16 @@ message DataPacket {
     DataStream.Chunk stream_chunk = 14;
     DataStream.Trailer stream_trailer = 15;
     EncryptedPacket encrypted_packet = 18;
+    // HappyRobot fork-private fields use 100+ to avoid colliding with upstream
+    // additions to this oneof when the fork is rebased (APP-4619).
+    SipInfo sip_info = 100;
   }
   // sequence number of reliable packet
   uint32 sequence = 16;
   // sid of the user that sent the message
   string participant_sid = 17;
 
-  // NEXT_ID: 19
+  // NEXT_ID: 19 (HR fork-private: 100+)
 }
 
 message EncryptedPacket {
@@ -424,6 +427,17 @@ message UserPacket {
 message SipDTMF {
   uint32 code = 3;
   string digit = 4;
+}
+
+// SipInfo carries an arbitrary payload to be relayed to the remote SIP party
+// as a SIP INFO request on the active call dialog (e.g. RingCX IVA bot updates
+// published as application/json, including a final {"final": true} payload).
+message SipInfo {
+  // MIME type of the body, e.g. "application/json". Sent as the SIP INFO
+  // Content-Type header.
+  string content_type = 1;
+  // Raw body of the SIP INFO request.
+  bytes body = 2;
 }
 
 message Transcription {
